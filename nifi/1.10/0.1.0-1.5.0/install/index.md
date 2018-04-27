@@ -257,4 +257,4 @@ Likewise this file can be referenced to update a nifi service.
    ```
 
 ## Secured Installation
-  Please refer Security Guide for secured installation of [NiFi](./security.md)
+  Please refer Security Guide for secured installation of [NiFi](../security/index.md)
