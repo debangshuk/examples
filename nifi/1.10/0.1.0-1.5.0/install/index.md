@@ -255,3 +255,6 @@ Likewise this file can be referenced to update a nifi service.
    ```shell
    dcos nifi update start --options=options.json
    ```
+
+## Secured Installation
+  Please refer Security Guide for secured installation of [NiFi](./security.md)
