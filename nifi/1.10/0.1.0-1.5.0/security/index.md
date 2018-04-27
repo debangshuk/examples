@@ -11,7 +11,7 @@ TThe DC/OS Apache NiFi service supports NiFi’s native transport encryption, au
 
 A good overview of these features can be found  [here](https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html). 
 
-## Transport Encryption and SSL Authentication
+## Transport Encryption and Kerberos Authentication
 With transport encryption enabled, DC/OS Apache NiFi will automatically deploy all nodes with the correct configuration to encrypt communication via SSL. The nodes will communicate securely between themselves using SSL. SSL authentication requires that all NiFi Nodes present a valid certificate from which their identity can be derived for communicating between themselves.
 DC/OS Apache NiFi uses the CN of the SSL certificate as the principal for a given Node. 
 For e.g. CN=nifi-0-node.demonifi, O="Mesosphere, Inc", L=San Francisco, ST=CA, C=US.
@@ -46,27 +46,7 @@ In DC/OS 1.10, the required permission is dcos:superuser full
    dcos security org users grant <service name> dcos:superuser full --description "grant permission to superuser" 
    ```
 where <service name> is the name of the service to be installed.
-
-## Install the service
-
-Install the DC/OS Apache NiFi service including the following options in addition to your own:
-
-   ```shell
-   {
-    "service": {
-       "service_account": "<your service account name>",
-       "service_account_secret": "<full path of service secret>",
-       "security": {
-          "tls_ssl": {
-             "enabled": true
-                     }
-                   }
-               }
-   }
-   ```
-    
-
-
+  
 ## Transport Encryption for Clients
 
 With Transport Encryption enabled, service clients will need to be configured to use [the DC/OS CA bundle](https://docs.mesosphere.com/latest/security/ent/tls-ssl/get-cert/) to verify the connections they make to the service. Consult your client’s documentation for trusting a CA and configure your client appropriately.
@@ -100,12 +80,14 @@ Kerberos authentication relies on a central authority to verify that NiFi Users 
 The DC/OS Apache NiFi service requires a Kerberos principal for the service principal and user principal.Each principal must be of the form
 
    ```shell
-   nifinode@<service realm>
+   nifiprincipal@<service realm>
    nifiadmin@<service realm>
    ```
 ### Place Service Keytab in DC/OS Secret Store
 
 The DC/OS Apache NiFi service uses a keytab containing above service and user principals (service keytab). After creating the principals above, generate the service keytab making sure to include all the node principals. This will be stored as a secret in the DC/OS Secret Store by name __dcos_base64__secret_name .The DC/OS security modules will handle decoding the file when it is used by the service. More details [here.](https://docs.mesosphere.com/services/ops-guide/overview/#binary-secrets)
+
+Create secret by name "nifiadmin_kerberos_secret" for password of Kerberos User Principal: nifiadmin
 
 Documentation for adding a file to the secret store can be found [here.](https://docs.mesosphere.com/latest/security/ent/secrets/create-secrets/#creating-secrets-from-a-file-via-the-dcos-enterprise-cli)
 
@@ -113,24 +95,33 @@ Note: Secrets access is controlled by [DC/OS Spaces](https://docs.mesosphere.com
 
 ### Install the Service
 Install the DC/OS Apache NiFi service with the following options in addition to your own:
+
    ```shell
-   {
+   { 
     "service": {
-        "security": {
-            "kerberos": {
-                "enabled": true,
-                "kdc": {
-                    "hostname": "<kdc host>",
-                    "port": <kdc port>
-                },
-                "primary": "<service primary default nifi>",
-                "realm": "<realm>",
-                "keytab_secret": "<path to keytab secret>",
-                "service_principal": "nifinode@<service realm>",
-                "user_principal": "nifiadmin@<service realm>"
-            }
-        }
+     "name": "/demo/nifi",
+      "security": {
+      "kerberos": {
+           "kdc": {
+          "hostname": "kdc.marathon.autoip.dcos.thisdcos.directory",
+          "port": 2500
+        },
+        "keytab_secret": "__dcos_base64___keytab",
+        "primary": "nifi",
+        "realm": "LOCAL",
+        "service_principal": "nifiprincipal@LOCAL",
+        "user_principal": "nifiadmin@LOCAL",
+        "user_principal_keytab": "nifiadmin_kerberos_secret"
+      },
+      "kerberos_tls": {
+        "enable": true
+      }
+    },
+    "service_account": "dcos_nifi",
+    "service_account_secret": "dcos_nifi_secret",
+    "virtual_network_enabled": true,
+    "virtual_network_name": "dcos",
     }
-}
+  }
    ```
 
