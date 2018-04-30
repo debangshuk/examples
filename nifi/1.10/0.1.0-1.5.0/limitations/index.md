@@ -42,3 +42,8 @@ Legacy Authorized Users File is not supported.
 ## LDAP Integration, OpenID Connect and Apache Knox
 
 LDAP integration, OpenID Connect and Apache Knox is not supported.
+
+
+## Installation Limitations
+
+The minimum memory requirement for NiFi installation is 512MB. NiFi installation will take time since the NiFi application is heavy in size (approx 1.10GB). The approximate installation time required would be around 20~25 Minutes for a 2 Node Cluster.
