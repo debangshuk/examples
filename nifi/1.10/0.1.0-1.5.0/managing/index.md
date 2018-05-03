@@ -396,3 +396,30 @@ This would return the Java home Path:
  sh $MESOS_SANDBOX/nifi-toolkit-${NIFI_VERSION}/bin/file-manager.sh -o backup -b nifi-backup -c $MESOS_SANDBOX/../../tasks/nifi-$POD_INSTANCE_INDEX-node*/nifi-{{NIFI_VERSION}} -v;
 ````
 
+## Metrics
+
+To check the metrics for the NiFi instances on individual agent nodes, we need to do the following:
+
+  1. In the first step we need to obtain the dcos auth token by issuing the following command:
+   ```shell
+      dcos config show core.dcos_acs_token
+   ````
+  We need to keep a copy of this token for later use.
+   
+  2. In the next step we need to ssh into the private agent on which we have the tasks running:
+   ```shell
+      dcos node ssh --master-proxy --mesos-id=<agent-mesos-id>
+   ````  
+  3. Finally we need to make the following curl requests as per the security settings:
+  
+   **TLS & KDC Mode:**
+   
+   ```shell
+      curl -k -H "Authorization: token=<acs_token>" https://localhost:61002/system/v1/metrics/v0/containers | jq
+   ````
+   **Non TLS & KDC Mode:**
+   
+   ```shell
+      curl -k -H "Authorization: token=<acs_token>" http://localhost:61001/system/v1/metrics/v0/containers | jq
+   ````  
+   More details about Metrics can be found [here](https://docs.mesosphere.com/1.10/metrics/quickstart/).
