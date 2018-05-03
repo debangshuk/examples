@@ -412,14 +412,14 @@ To check the metrics for the NiFi instances on individual agent nodes, we need t
    ````  
   3. Finally we need to make the following curl requests as per the security settings:
   
-   **TLS & KDC Mode:**
+     **TLS & KDC Mode:**
    
-   ```shell
+     ```shell
       curl -k -H "Authorization: token=<acs_token>" https://localhost:61002/system/v1/metrics/v0/containers | jq
-   ````
-   **Non TLS & KDC Mode:**
+     ````
+     **Non TLS & KDC Mode:**
    
-   ```shell
+     ```shell
       curl -k -H "Authorization: token=<acs_token>" http://localhost:61001/system/v1/metrics/v0/containers | jq
-   ````  
-   More details about Metrics can be found [here](https://docs.mesosphere.com/1.10/metrics/quickstart/).
+     ````  
+More details about Metrics can be found [here](https://docs.mesosphere.com/1.10/metrics/quickstart/).
